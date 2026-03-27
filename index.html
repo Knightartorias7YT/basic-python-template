@@ -1,18 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <meta charset="UTF-8">
+    <title>Mini Python Editor</title>
+    <!-- Load PyScript CSS and JS -->
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #editor { width: 100%; height: 150px; font-family: monospace; }
+        #output { background: #f0f0f0; padding: 10px; margin-top: 10px; border: 1px solid #ccc; }
+    </style>
 </head>
 <body>
-    <textarea id="editor" rows="10" cols="30">print("Hello from Python!")</textarea>
-    <button py-click="run_python">Run</button>
-    <div id="output"></div>
+    <h3>Python Editor</h3>
+    <textarea id="editor" spellcheck="false"># Edit your Python code here
+print("Hello from PyScript!")
+x = 10
+y = 20
+print(f"Sum: {x + y}")</textarea>
+    <br>
+    <button py-click="run_code">Run Code</button>
+    
+    <div id="output">Output will appear here...</div>
 
-    <py-script>
-        def run_python():
-            editor = Element("editor").element.value
-            pyscript.write("output", editor)
-    </py-script>
+    <script type="py" id="py-script">
+        from pyscript import document
+        from pyodide.ffi import create_proxy
+
+        def run_code(*args):
+            # Load code from textarea
+            code = document.getElementById("editor").value
+            output_div = document.getElementById("output")
+            output_div.innerHTML = "" # Clear previous output
+            
+            # Execute code and capture output
+            try:
+                # Redirect stdout to a variable
+                import sys
+                from io import StringIO
+                old_stdout = sys.stdout
+                sys.stdout = mystdout = StringIO()
+                
+                exec(code)
+                
+                sys.stdout = old_stdout
+                output_div.innerText = mystdout.getvalue()
+            except Exception as e:
+                output_div.innerText = str(e)
+    </script>
 </body>
 </html>
